@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrabalhoSockets", "TrabalhoSockets\TrabalhoSockets.csproj", "{E6A977EA-AC22-4FD6-AC03-558FE7DC88A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrabalhoSocketsEngine", "TrabalhoSocketsEngine\TrabalhoSocketsEngine.csproj", "{331D4E29-0315-4C2F-8CEC-BC8600C066E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrabalhoSocketsEngineTests", "TrabalhoSocketsEngineTests\TrabalhoSocketsEngineTests.csproj", "{16DCEEFA-1BF7-4B16-9897-C248558534A3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrabalhoSocketsUI", "TrabalhoSocketsUI\TrabalhoSocketsUI.csproj", "{408BCA79-89F0-4249-9865-E544521E3AFF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrabalhoSocketsCommunication", "TrabalhoSocketsCommunication\TrabalhoSocketsCommunication.csproj", "{501D92D0-FCEA-460F-AE62-95DD04ED65BC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E6A977EA-AC22-4FD6-AC03-558FE7DC88A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6A977EA-AC22-4FD6-AC03-558FE7DC88A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6A977EA-AC22-4FD6-AC03-558FE7DC88A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6A977EA-AC22-4FD6-AC03-558FE7DC88A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{331D4E29-0315-4C2F-8CEC-BC8600C066E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{331D4E29-0315-4C2F-8CEC-BC8600C066E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{331D4E29-0315-4C2F-8CEC-BC8600C066E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{331D4E29-0315-4C2F-8CEC-BC8600C066E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16DCEEFA-1BF7-4B16-9897-C248558534A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16DCEEFA-1BF7-4B16-9897-C248558534A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16DCEEFA-1BF7-4B16-9897-C248558534A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16DCEEFA-1BF7-4B16-9897-C248558534A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{408BCA79-89F0-4249-9865-E544521E3AFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{408BCA79-89F0-4249-9865-E544521E3AFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{408BCA79-89F0-4249-9865-E544521E3AFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{408BCA79-89F0-4249-9865-E544521E3AFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{501D92D0-FCEA-460F-AE62-95DD04ED65BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{501D92D0-FCEA-460F-AE62-95DD04ED65BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{501D92D0-FCEA-460F-AE62-95DD04ED65BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{501D92D0-FCEA-460F-AE62-95DD04ED65BC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
