@@ -22,27 +22,7 @@ namespace TrabalhoSocketsEngine
                 return _board;
             }
         }
-
-        public void Print()
-        {
-            for (int i = 0; i < 9; i++)
-            {
-                for (int j = 0; j < 9; j++)
-                {
-                    if (Board[i, j] is King)
-                        Console.Write("K\t");
-                    else if (Board[i, j] is Mercenary)
-                        Console.Write("M\t");
-                    else if (Board[i, j] is Bodyguard)
-                        Console.Write("G\t");
-                    else
-                        Console.Write("X\t");
-                }
-
-                Console.WriteLine("\n");
-            }
-        }
-
+        
         public void MoveFromTo(int sourceR, int sourceC, int targetR, int targetC)
         {
             var element = _board[sourceR, sourceC];
@@ -301,6 +281,26 @@ namespace TrabalhoSocketsEngine
             {
                 Board[i, 4] = new Bodyguard() { R = i, C = 4 };
                 Board[4, i] = new Bodyguard() { R = 4, C = i };
+            }
+        }
+        
+        public void Print()
+        {
+            for (int i = 0; i < 9; i++)
+            {
+                for (int j = 0; j < 9; j++)
+                {
+                    if (Board[i, j] is King)
+                        Console.Write("K\t");
+                    else if (Board[i, j] is Mercenary)
+                        Console.Write("M\t");
+                    else if (Board[i, j] is Bodyguard)
+                        Console.Write("G\t");
+                    else
+                        Console.Write("X\t");
+                }
+
+                Console.WriteLine("\n");
             }
         }
     }

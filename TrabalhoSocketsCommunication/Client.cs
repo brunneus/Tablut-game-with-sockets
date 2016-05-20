@@ -43,17 +43,6 @@ namespace TrabalhoSocketsCommunication
             return (GameBoard)reply.ReplyServerValue;
         }
 
-        public void SendRemoveCapturedElementsAfterLastMovementRequest(IGameBoardElement lastMovedElement)
-        {
-            var request = new Request()
-            {
-                Type = eRequestType.RemoveCapturedElementsAfterLastMovement,
-                ClientParameterValue = lastMovedElement
-            };
-
-            SendRequestToServer(request);
-        }
-
         public IEnumerable<IGameBoardElement> SendGetCapturedElementsAfterLastMovementRequest(IGameBoardElement lastMovedElement)
         {
             var request = new Request()
@@ -64,17 +53,6 @@ namespace TrabalhoSocketsCommunication
 
             var reply = SendRequestToServer(request);
             return (IEnumerable<IGameBoardElement>)reply.ReplyServerValue;
-        }
-
-        public void CloseConnection()
-        {
-            var request = new Request()
-            {
-                Type = eRequestType.CloseSocket,
-            };
-
-            this.SendRequestToServer(request);
-            _client.Close();
         }
 
         private Request SendRequestToServer(Request request)
@@ -103,11 +81,12 @@ namespace TrabalhoSocketsCommunication
             return (eGameStatus)Enum.Parse(typeof(eGameStatus), reply.ReplyServerValue.ToString());
         }
 
-        public void SendResetRequest()
+        public void SendRemoveCapturedElementsAfterLastMovementRequest(IGameBoardElement lastMovedElement)
         {
             var request = new Request()
             {
-                Type = eRequestType.ResetGameBoard,
+                Type = eRequestType.RemoveCapturedElementsAfterLastMovement,
+                ClientParameterValue = lastMovedElement
             };
 
             SendRequestToServer(request);
@@ -122,6 +101,27 @@ namespace TrabalhoSocketsCommunication
             };
 
             return (bool)SendRequestToServer(request).ReplyServerValue;
+        }
+
+        public void SendResetRequest()
+        {
+            var request = new Request()
+            {
+                Type = eRequestType.ResetGameBoard,
+            };
+
+            SendRequestToServer(request);
+        }
+
+        public void CloseConnection()
+        {
+            var request = new Request()
+            {
+                Type = eRequestType.CloseSocket,
+            };
+
+            this.SendRequestToServer(request);
+            _client.Close();
         }
     }
 }

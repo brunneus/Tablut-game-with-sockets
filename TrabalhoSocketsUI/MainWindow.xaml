@@ -1,147 +1,168 @@
 ﻿<Window x:Class="TrabalhoSocketsUI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:behaviors="clr-namespace:TrabalhoSocketsUI.Behaviors"
+        xmlns:converters="clr-namespace:TrabalhoSocketsUI.Converters"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TrabalhoSocketsUI"
         xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:ie="http://schemas.microsoft.com/expression/2010/interactions"
-        xmlns:converters="clr-namespace:TrabalhoSocketsUI.Converters"
-        xmlns:behaviors="clr-namespace:TrabalhoSocketsUI.Behaviors"
-        mc:Ignorable="d"
-        ResizeMode="CanResizeWithGrip"
-        Title="MainWindow"
-        Height="850" 
-        Width="850">
+        xmlns:local="clr-namespace:TrabalhoSocketsUI"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        Title="Tablut"
+        Width="800"
+        Height="765"
+        ResizeMode="CanMinimize"
+        mc:Ignorable="d">
     <Window.DataContext>
-        <local:MainWindowViewModel/>
+        <local:MainWindowViewModel />
     </Window.DataContext>
     <Window.Resources>
 
         <DataTemplate x:Key="CapturedElementsTemplate">
-            <Image Source="{Binding Converter={converters:eTeamToImageConverter}}"
-                   Width="38"
+            <Image Width="38"
                    Height="38"
-                   Stretch="Fill"/>
+                   Source="{Binding Converter={converters:eTeamToImageConverter}}"
+                   Stretch="Fill" />
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type local:GameBoardElementWrapper}">
-            <local:GameBoardElementControl>
+            <local:GameBoardElementControl BorderBrush="Black">
                 <i:Interaction.Behaviors>
-                    <behaviors:MouseEnterGameBoardControlBehavior MainWindowViewModel="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"/>
+                    <behaviors:MouseEnterGameBoardControlBehavior MainWindowViewModel="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
                 </i:Interaction.Behaviors>
             </local:GameBoardElementControl>
         </DataTemplate>
 
         <Style TargetType="ListBoxItem">
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="IsHitTestVisible" Value="False"/>
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="IsHitTestVisible" Value="False" />
         </Style>
     </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Menu Height="30">
-            <MenuItem Header="Jogo" Height="30">
-                <MenuItem Header="Novo"
-                          Command="{Binding NewGameCommand}"/>
+            <MenuItem Height="30" Header="Jogo">
+                <MenuItem Command="{Binding NewGameCommand}" Header="Novo" />
             </MenuItem>
         </Menu>
         <StackPanel Grid.Row="1">
-        <Grid Margin="5">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="4*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="4*"/>
-            </Grid.ColumnDefinitions>
+            <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="4*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="4*" />
+                </Grid.ColumnDefinitions>
 
-            <StackPanel 
-                Grid.Column="1">
-                <Border
-                    BorderThickness="2"
-                    BorderBrush="Gainsboro">
-                    <ListBox ItemsSource="{Binding Elements, Mode=TwoWay}"
-                         IsHitTestVisible="{Binding GameEnded, Mode=TwoWay, Converter={converters:NegateConverter}}"
-                         Grid.Column="1"
-                         BorderThickness="0"
-                         Padding="-1"
-                         VerticalAlignment="Top"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         ScrollViewer.VerticalScrollBarVisibility="Disabled"
-                         HorizontalContentAlignment="Stretch"
-                         VerticalContentAlignment="Stretch">
-                        <ListBox.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <UniformGrid Columns="9"
-                                 Width="650"
-                                 Height="650"
-                                 Rows="9"/>
-                            </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
-                        <ListBox.ItemContainerStyle>
-                            <Style TargetType="{x:Type ListBoxItem}">
-                                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-                                <Setter Property="Padding" Value="0"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <ListBox Grid.Column="0"
+                         BorderBrush="Gainsboro"
+                         BorderThickness="1"
+                         ItemTemplate="{StaticResource CapturedElementsTemplate}"
+                         ItemsSource="{Binding BlackElementsCaptured}"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
+
+                <StackPanel Grid.Column="1">
+                    <Border Margin="10,0,10,0"
+                            BorderBrush="Black"
+                            BorderThickness="1">
+                        <ListBox Grid.Column="1"
+                                 VerticalAlignment="Top"
+                                 HorizontalContentAlignment="Stretch"
+                                 VerticalContentAlignment="Stretch"
+                                 Background="Wheat"
+                                 BorderThickness="0"
+                                 IsHitTestVisible="{Binding GameEnded,
+                                                            Mode=TwoWay,
+                                                            Converter={converters:NegateConverter}}"
+                                 ItemsSource="{Binding Elements,
+                                                       Mode=TwoWay}"
+                                 Padding="-1"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                 ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Width="650"
+                                                 Height="650"
+                                                 Columns="9"
+                                                 Rows="9" />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListBoxItem}">
+                                    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                  SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+                    </Border>
+                    <TextBlock Margin="0,10,0,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="14"
+                               FontWeight="Bold">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="Jogador atual: Peças brancas" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CurrentTeamPlaying}" Value="Black">
+                                        <Setter Property="Text" Value="Jogador atual: Peças pretas" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding GameEnded}" Value="true">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
                             </Style>
-                        </ListBox.ItemContainerStyle>
-                    </ListBox>
-                </Border>
-                <TextBlock VerticalAlignment="Center"
-                           FontSize="14"
-                           FontWeight="Bold"
-                           HorizontalAlignment="Center">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Text" Value="Jogador atual: Peças brancas"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding CurrentTeamPlay}" Value="Black">
-                                    <Setter Property="Text" Value="Jogador atual: Peças pretas"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding GameEnded}" Value="true">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-                <TextBlock Text="{Binding GameStatusMessage}"
-                           FontSize="16"
-                           FontWeight="Bold"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Center"/>
-            </StackPanel>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Margin="0,10,0,0"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               Text="{Binding GameStatusMessage}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding GameEnded}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
 
-            <ListBox Grid.Column="0"
-                     BorderThickness="0"
-                     ItemTemplate="{StaticResource CapturedElementsTemplate}"
-                     ItemsSource="{Binding BlackElementsCaptured}">
-            </ListBox>
-
-            <ListBox Grid.Column="2"
-                     BorderThickness="0"
-                     ItemTemplate="{StaticResource CapturedElementsTemplate}"
-                     ItemsSource="{Binding WhiteElementsCaptured}">
-            </ListBox>
-        </Grid>
-    </StackPanel>
+                <ListBox Grid.Column="2"
+                         BorderBrush="Gainsboro"
+                         BorderThickness="1"
+                         ItemTemplate="{StaticResource CapturedElementsTemplate}"
+                         ItemsSource="{Binding WhiteElementsCaptured}"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
+            </Grid>
+        </StackPanel>
     </Grid>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
-            <i:InvokeCommandAction Command="{Binding CloseConnectionCommand}"/>
+            <i:InvokeCommandAction Command="{Binding CloseConnectionCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
 </Window>

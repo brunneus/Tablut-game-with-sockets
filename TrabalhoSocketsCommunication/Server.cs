@@ -22,12 +22,12 @@ namespace TrabalhoSocketsCommunication
             _gameBoard.Initialize();
         }
 
-        private static Server _singleton;
-        public static Server Singleton
+        private static Server _instance;
+        public static Server Instance
         {
             get
             {
-                return _singleton ?? (_singleton = new Server());
+                return _instance ?? (_instance = new Server());
             }
         }
 
@@ -75,17 +75,17 @@ namespace TrabalhoSocketsCommunication
             {
                 return HandleRemoveCapturedElementsAfterLastMovementRequest(request);
             }
-            else if(request.Type == eRequestType.GetUpdatedGameBoard)
-            {
-                return _gameBoard;
-            }
             else if(request.Type == eRequestType.GetGameStatus)
             {
-                return this.HandleGetGameStatusRequest(request);
+                return HandleGetGameStatusRequest(request);
             }
             else if(request.Type == eRequestType.CanMoveElement)
             {
                 return HandleCanMoveRequest(request);
+            }
+            else if (request.Type == eRequestType.GetUpdatedGameBoard)
+            {
+                return _gameBoard;
             }
             else if(request.Type == eRequestType.ResetGameBoard)
             {

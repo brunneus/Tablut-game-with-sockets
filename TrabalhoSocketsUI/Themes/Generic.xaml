@@ -1,41 +1,41 @@
-<ResourceDictionary
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
-    xmlns:ie="http://schemas.microsoft.com/expression/2010/interactions"
-    xmlns:converters="clr-namespace:TrabalhoSocketsUI.Converters"
-    xmlns:local="clr-namespace:TrabalhoSocketsUI">
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converters="clr-namespace:TrabalhoSocketsUI.Converters"
+                    xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+                    xmlns:ie="http://schemas.microsoft.com/expression/2010/interactions"
+                    xmlns:local="clr-namespace:TrabalhoSocketsUI">
 
     <Style TargetType="{x:Type local:GameBoardElementControl}">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate>
                     <Grid Background="Transparent">
-                        <Border BorderThickness="1"
-                             BorderBrush="Gainsboro">
-                            <Image Source="{Binding Converter={converters:eTeamToImageConverter}}"
-                            Stretch="Fill"/>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseLeftButtonDown">
+                                <i:InvokeCommandAction CommandParameter="{Binding}">
+                                    <i:InvokeCommandAction.Command>
+                                        <Binding Path="DataContext.SelectElementToMoveCommand" RelativeSource="{RelativeSource AncestorType={x:Type Window}}" />
+                                    </i:InvokeCommandAction.Command>
+                                </i:InvokeCommandAction>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <Border>
+                            <Image Source="{Binding Converter={converters:eTeamToImageConverter}}" Stretch="Fill" />
                             <Border.Style>
                                 <Style TargetType="Border">
-                                    <Setter Property="Background" Value="{Binding Background, RelativeSource={RelativeSource TemplatedParent}}"/>
+                                    <Setter Property="Background" Value="{Binding Background, RelativeSource={RelativeSource TemplatedParent}}" />
+                                    <Setter Property="BorderBrush" Value="{Binding BorderBrush, RelativeSource={RelativeSource TemplatedParent}}" />
+                                    <Setter Property="BorderThickness" Value="1" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                            <Setter Property="Background" Value="SkyBlue"/>
+                                            <Setter Property="Background" Value="SkyBlue" />
+                                            <Setter Property="BorderBrush" Value="DodgerBlue" />
+                                            <Setter Property="BorderThickness" Value="2" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </Border.Style>
                         </Border>
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="MouseLeftButtonDown">
-                                <i:InvokeCommandAction CommandParameter="{Binding}">
-                                    <i:InvokeCommandAction.Command>
-                                        <Binding Path="DataContext.SelectElementToMoveCommand"
-                                         RelativeSource="{RelativeSource AncestorType={x:Type Window}}"/>
-                                    </i:InvokeCommandAction.Command>
-                                </i:InvokeCommandAction>
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

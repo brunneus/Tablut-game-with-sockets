@@ -13,6 +13,5 @@ namespace TrabalhoSocketsCommunication
        public eRequestType Type { get; set; }
        public object ClientParameterValue { get; set; }
        public object ReplyServerValue { get; set; }
-       
     }
 }

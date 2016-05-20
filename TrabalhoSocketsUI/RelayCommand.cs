@@ -7,19 +7,19 @@ namespace TrabalhoSocketsUI
     public class RelayCommand : ICommand
     {
         #region Members
-        readonly Func<Object, Boolean> _canExecute;
-        readonly Action<Object> _execute;
+        readonly Func<bool> _canExecute;
+        readonly Action _execute;
 
         public event EventHandler CanExecuteChanged;
         #endregion
 
         #region Constructors
-        public RelayCommand(Action<Object> execute)
+        public RelayCommand(Action execute)
             : this(execute, null)
         {
         }
 
-        public RelayCommand(Action<Object> execute, Func<Object, Boolean> canExecutee)
+        public RelayCommand(Action execute, Func<bool> canExecutee)
         {
             if (execute == null)
                 throw new ArgumentNullException("execute");
@@ -31,15 +31,47 @@ namespace TrabalhoSocketsUI
             if (_canExecute == null)
                 return true;
 
-            return _canExecute.Invoke(parameter);
+            return _canExecute.Invoke();
         }
 
         public void Execute(object parameter)
         {
-            _execute.Invoke(parameter);
+            _execute.Invoke();
         }
 
         #endregion
     }
+
+    public class RelayCommand<T> : ICommand
+    {
+        public event EventHandler CanExecuteChanged;
+        private Action<T> _actionToExecute;
+        private Func<T, bool> _canExecuteFunc;
+
+        public RelayCommand(Action<T> action)
+        {
+            _actionToExecute = action;
+        }
+
+        public RelayCommand(Action<T>  action, Func<T, bool> canExecute)
+        {
+            _actionToExecute = action;
+            _canExecuteFunc = canExecute;
+        }
+
+        public bool CanExecute(object parameter)
+        {
+            if (_canExecuteFunc == null)
+                return true;
+
+            return _canExecuteFunc.Invoke((T)parameter);
+        }
+
+        public void Execute(object parameter)
+        {
+            _actionToExecute.Invoke((T)parameter);
+        }
+    }
+
 
 }

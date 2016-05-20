@@ -46,7 +46,6 @@
   <ItemGroup>
     <Compile Include="eRequestType.cs" />
     <Compile Include="MoveElementTransferObject.cs" />
-    <Compile Include="SerializableAnonymousObject.cs" />
     <Compile Include="SerializationHelper.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

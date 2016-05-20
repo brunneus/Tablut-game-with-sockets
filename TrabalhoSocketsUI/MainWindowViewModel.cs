@@ -14,7 +14,7 @@ namespace TrabalhoSocketsUI
     {
         public MainWindowViewModel()
         {
-            Server.Singleton.Intialize();
+            Server.Instance.Intialize();
 
             _client = new Client();
             _client.InitializeConnection();
@@ -23,61 +23,25 @@ namespace TrabalhoSocketsUI
             WhiteElementsCaptured = new ObservableCollection<GameBoardElementWrapper>();
             BlackElementsCaptured = new ObservableCollection<GameBoardElementWrapper>();
 
-            this.NewGame(null);
+            NewGame();
         }
 
         public ObservableCollection<GameBoardElementWrapper> Elements { get; set; }
         public ObservableCollection<GameBoardElementWrapper> WhiteElementsCaptured { get; set; }
         public ObservableCollection<GameBoardElementWrapper> BlackElementsCaptured { get; set; }
 
-        private RelayCommand _selectElementToMoveCommand;
-        public RelayCommand SelectElementToMoveCommand
+        private RelayCommand<GameBoardElementWrapper> _selectElementToMoveCommand;
+        public RelayCommand<GameBoardElementWrapper> SelectElementToMoveCommand
         {
             get
             {
                 if (_selectElementToMoveCommand == null)
-                    _selectElementToMoveCommand = new RelayCommand((param) =>
-                    {
-                        var clickedWrapper = param as GameBoardElementWrapper;
-
-                        if (_selectedWrapper == null && clickedWrapper.Element == null)
-                            return;
-
-                        if (clickedWrapper.Element != null && clickedWrapper.Element.Team != CurrentTeamPlay)
-                        {
-                            this.SelectedWrapper = null;
-                            return;
-                        }
-
-                        if (SelectedWrapper != null)
-                        {
-                            if (Client.SendCanMoveToRequest(_selectedWrapper.Element, clickedWrapper.R, clickedWrapper.C))
-                            {
-                                Client.SendRequestToServerToMoveElement(SelectedWrapper.Element, clickedWrapper.R, clickedWrapper.C);
-
-                                var lastMovedElement = Client.GetUpdatedGameBoard().ElementAt(clickedWrapper.R, clickedWrapper.C);
-                                UpdateListOfCapturedElements(lastMovedElement);
-
-                                Client.SendRemoveCapturedElementsAfterLastMovementRequest(lastMovedElement);
-                                SelectedWrapper = null;
-
-                                CurrentTeamPlay = CurrentTeamPlay == eTeam.Black ? eTeam.White : eTeam.Black;
-
-                                ReloadLoadElements();
-                                UpdateGameStatusMessage();
-                            }
-                        }
-                        else
-                        {
-                            SelectedWrapper = clickedWrapper;
-                            SelectedWrapper.IsSelected = true;
-                        }
-                    });
+                    _selectElementToMoveCommand = new RelayCommand<GameBoardElementWrapper>((param) => MoveElement(param));
 
                 return _selectElementToMoveCommand;
             }
         }
-
+        
         private RelayCommand _newGameCommand;
         public RelayCommand NewGameCommand
         {
@@ -96,7 +60,7 @@ namespace TrabalhoSocketsUI
             get
             {
                 if (_closeConnectionCommand == null)
-                    _closeConnectionCommand = new RelayCommand((param) => Client.CloseConnection());
+                    _closeConnectionCommand = new RelayCommand(() => Client.CloseConnection());
 
                 return _closeConnectionCommand;
             }
@@ -133,32 +97,18 @@ namespace TrabalhoSocketsUI
                 PropertyChanged(this, new PropertyChangedEventArgs("GameEnded"));
             }
         }
-        private GameBoardElementWrapper _selectedWrapper;
-        public GameBoardElementWrapper SelectedWrapper
+
+        private eTeam _currentTeamPlaying = eTeam.Black;
+        public eTeam CurrentTeamPlaying
         {
             get
             {
-                return _selectedWrapper;
-            }
-
-            set
-            {
-                _selectedWrapper = value;
-                PropertyChanged(this, new PropertyChangedEventArgs("SelectedWrapper"));
-            }
-        }
-
-        private eTeam _currentTeamPlay = eTeam.Black;
-        public eTeam CurrentTeamPlay
-        {
-            get
-            {
-                return _currentTeamPlay;
+                return _currentTeamPlaying;
             }
             private set
             {
-                _currentTeamPlay = value;
-                PropertyChanged(this, new PropertyChangedEventArgs("CurrentTeamPlay"));
+                _currentTeamPlaying = value;
+                PropertyChanged(this, new PropertyChangedEventArgs("CurrentTeamPlaying"));
             }
         }
 
@@ -176,7 +126,49 @@ namespace TrabalhoSocketsUI
             }
         }
         
-        private void NewGame(object obj)
+        private void MoveElement(GameBoardElementWrapper clickedWrapper)
+        {
+            var selectedWrapper = this.Elements.FirstOrDefault(e => e.IsSelected);
+
+            if (clickedWrapper.Element != null && clickedWrapper.Element.Team != CurrentTeamPlaying)
+            {
+                if (selectedWrapper != null)
+                    selectedWrapper.IsSelected = false;
+
+                return;
+            }
+
+            if (clickedWrapper.Element == null && selectedWrapper == null)
+                return;
+
+            if (selectedWrapper == null)
+            {
+                clickedWrapper.IsSelected = true;
+            }
+            else
+            {
+                if (Client.SendCanMoveToRequest(selectedWrapper.Element, clickedWrapper.R, clickedWrapper.C))
+                {
+                    Client.SendRequestToServerToMoveElement(selectedWrapper.Element, clickedWrapper.R, clickedWrapper.C);
+
+                    var lastMovedElement = Client.GetUpdatedGameBoard().ElementAt(clickedWrapper.R, clickedWrapper.C);
+                    UpdateListOfCapturedElements(lastMovedElement);
+                    Client.SendRemoveCapturedElementsAfterLastMovementRequest(lastMovedElement);
+
+                    CurrentTeamPlaying = CurrentTeamPlaying == eTeam.Black ? eTeam.White : eTeam.Black;
+
+                    ReloadLoadElements();
+                    UpdateGameStatusMessage();
+                }
+                else
+                {
+                    selectedWrapper.IsSelected = false;
+                    selectedWrapper = null;
+                }
+            }
+        }
+
+        private void NewGame()
         {
             _client.SendResetRequest();
 
@@ -185,7 +177,6 @@ namespace TrabalhoSocketsUI
             BlackElementsCaptured.Clear();
             GameEnded = false;
             GameStatusMessage = string.Empty;
-            SelectedWrapper = null;
 
             ReloadLoadElements();
         }
@@ -194,6 +185,9 @@ namespace TrabalhoSocketsUI
         {
             if (lastMovedElement == null)
                 return;
+
+            var blackTeamElementsCount = this.Elements.Where(e => e.Element != null && e.Element.Team == eTeam.Black);
+            var whiteTeamElementsCount = this.Elements.Where(e => e.Element != null && e.Element.Team == eTeam.White);
 
             var elementsCaptured = Client.SendGetCapturedElementsAfterLastMovementRequest(lastMovedElement);
             var team = lastMovedElement.Team == eTeam.Black ? eTeam.White : eTeam.Black;
@@ -227,7 +221,8 @@ namespace TrabalhoSocketsUI
         private void UpdateGameStatusMessage()
         {
             var gameStatus = Client.SendGameStatusMessageRequest();
-            this.GameEnded = gameStatus != eGameStatus.Running;
+
+            GameEnded = gameStatus != eGameStatus.Running;
 
             if (gameStatus == eGameStatus.BlackTeamWithoutValidMovements)
             {

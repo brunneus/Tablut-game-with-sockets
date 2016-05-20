@@ -29,30 +29,39 @@ namespace TrabalhoSocketsUI.Behaviors
         private void AssociatedObject_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
             this.AssociatedObject.Background = Brushes.Transparent;
+            this.AssociatedObject.BorderBrush = Brushes.Black;
         }
 
         private void AssociatedObject_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
         {
             var wrapper = this.AssociatedObject.DataContext as GameBoardElementWrapper;
-            var selectedWrapper = this.MainWindowViewModel.SelectedWrapper;
+            var selectedWrapper = this.MainWindowViewModel.Elements.FirstOrDefault(element => element.IsSelected);
             
             if (selectedWrapper != null)
             {
                 var gameBoard = MainWindowViewModel.Client.GetUpdatedGameBoard();
+
                 if (gameBoard.CanMoveTo(selectedWrapper.Element, wrapper.R, wrapper.C))
-                    AssociatedObject.Background = Brushes.Green;
+                {
+                    AssociatedObject.Background = Brushes.LightGreen;
+                    AssociatedObject.BorderBrush = Brushes.Green;
+                }
                 else
-                    AssociatedObject.Background = Brushes.Red;
+                {
+                    AssociatedObject.Background = Brushes.LightCoral;
+                    AssociatedObject.BorderBrush = Brushes.Red;
+                }
             }
             else
             {
-                if (wrapper.Element == null || wrapper.Element.Team != MainWindowViewModel.CurrentTeamPlay)
+                if (wrapper.Element == null || wrapper.Element.Team != MainWindowViewModel.CurrentTeamPlaying)
                 {
                     this.AssociatedObject.Background = Brushes.Transparent;
                 }
                 else
                 {
                     this.AssociatedObject.Background = Brushes.LightBlue;
+                    this.AssociatedObject.BorderBrush = Brushes.DodgerBlue;
                 }
             }
         }
