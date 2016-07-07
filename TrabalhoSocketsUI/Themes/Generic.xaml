@@ -20,7 +20,14 @@
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
                         <Border>
-                            <Image Source="{Binding Converter={converters:eTeamToImageConverter}}" Stretch="Fill" />
+                            <Image Stretch="Fill" >
+                                <Image.Source>
+                                    <MultiBinding Converter="{converters:eTeamToImageConverter}">
+                                        <Binding Path="Element" Mode="TwoWay"/>
+                                        <Binding Path="."/>
+                                    </MultiBinding>
+                                </Image.Source>
+                            </Image>
                             <Border.Style>
                                 <Style TargetType="Border">
                                     <Setter Property="Background" Value="{Binding Background, RelativeSource={RelativeSource TemplatedParent}}" />

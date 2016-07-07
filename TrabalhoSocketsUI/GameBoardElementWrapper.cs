@@ -24,7 +24,6 @@ namespace TrabalhoSocketsUI
             {
                 return _isSelected;
             }
-
             set
             {
                 _isSelected = value;
@@ -38,6 +37,11 @@ namespace TrabalhoSocketsUI
             get
             {
                 return _element;
+            }
+            set
+            {
+                _element = value;
+                PropertyChanged(this, new PropertyChangedEventArgs("Element"));
             }
         }
         

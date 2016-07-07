@@ -10,7 +10,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         Title="Tablut"
         Width="800"
-        Height="765"
+        Height="800"
         ResizeMode="CanMinimize"
         mc:Ignorable="d">
     <Window.DataContext>
@@ -21,8 +21,14 @@
         <DataTemplate x:Key="CapturedElementsTemplate">
             <Image Width="38"
                    Height="38"
-                   Source="{Binding Converter={converters:eTeamToImageConverter}}"
-                   Stretch="Fill" />
+                   Stretch="Fill" >
+                <Image.Source>
+                    <MultiBinding Converter="{converters:eTeamToImageConverter}">
+                        <Binding Path="Element" Mode="TwoWay"/>
+                        <Binding Path="."/>
+                    </MultiBinding>
+                </Image.Source>
+            </Image>
         </DataTemplate>
 
         <DataTemplate DataType="{x:Type local:GameBoardElementWrapper}">
@@ -71,6 +77,22 @@
                          ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
 
                 <StackPanel Grid.Column="1">
+                    <TextBlock Margin="10"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="14"
+                               FontWeight="Bold">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="Voce controla as peças brancas."/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Team}" Value="Black">
+                                        <Setter Property="Text" Value="Voce controla as peças pretas."/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                     <Border Margin="10,0,10,0"
                             BorderBrush="Black"
                             BorderThickness="1">
@@ -80,13 +102,9 @@
                                  VerticalContentAlignment="Stretch"
                                  Background="Wheat"
                                  BorderThickness="0"
-                                 IsHitTestVisible="{Binding GameEnded,
-                                                            Mode=TwoWay,
-                                                            Converter={converters:NegateConverter}}"
                                  ItemsSource="{Binding Elements,
                                                        Mode=TwoWay}"
                                  Padding="-1"
-                                 IsEnabled="{Binding IsMyTimeToPlay}"
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                  ScrollViewer.VerticalScrollBarVisibility="Disabled">
                             <ListBox.ItemsPanel>
@@ -113,6 +131,20 @@
                                     </Setter>
                                 </Style>
                             </ListBox.ItemContainerStyle>
+                            <ListBox.Style>
+                                <Style TargetType="ListBox">
+                                    <Setter Property="IsHitTestVisible" Value="True"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding GameEnded}" Value="True">
+                                            <Setter Property="IsHitTestVisible" Value="False"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsMyTimeToPlay}" Value="False">
+                                            <Setter Property="IsHitTestVisible" Value="False"/>
+                                            <Setter Property="Background" Value="Coral"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListBox.Style>
                         </ListBox>
                     </Border>
                     <TextBlock Margin="0,10,0,0"
@@ -122,11 +154,11 @@
                                FontWeight="Bold">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
-                                <Setter Property="Text" Value="Aguarde, o outro jogador esta jogando......" />
+                                <Setter Property="Text" Value="Aguarde o outro jogador jogar......" />
                                 
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsMyTimeToPlay}" Value="True">
-                                        <Setter Property="Text" Value="É a sua vez de jogar!!!!!" />
+                                        <Setter Property="Text" Value="É a sua vez de jogar!" />
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding GameEnded}" Value="true">
                                         <Setter Property="Visibility" Value="Collapsed" />

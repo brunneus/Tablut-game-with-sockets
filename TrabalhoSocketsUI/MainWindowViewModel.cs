@@ -17,24 +17,23 @@ namespace TrabalhoSocketsUI
 
         public MainWindowViewModel()
         {
-            //Server.Instance.Intialize();
-
             _client = new Client();
             _client.InitializeConnection();
+            _worker.WorkerSupportsCancellation = true;
 
-            Elements = new ObservableCollection<GameBoardElementWrapper>();
+            Elements = new GameBoardElementWrapper[81];
             WhiteElementsCaptured = new ObservableCollection<GameBoardElementWrapper>();
             BlackElementsCaptured = new ObservableCollection<GameBoardElementWrapper>();
 
-            Team = _client.GiveTeam();
-            IsMyTimeToPlay = Team == _client.GetTeamPlaying();
-
             NewGame();
+
+            _team = _client.SelectTeam();
+            _isMyTimeToPlay = Team == _client.GetTeamPlaying();
 
             WaitOtherPlayerPlays();
         }
 
-        public ObservableCollection<GameBoardElementWrapper> Elements { get; set; }
+        public GameBoardElementWrapper[] Elements { get; set; }
         public ObservableCollection<GameBoardElementWrapper> WhiteElementsCaptured { get; set; }
         public ObservableCollection<GameBoardElementWrapper> BlackElementsCaptured { get; set; }
 
@@ -68,7 +67,12 @@ namespace TrabalhoSocketsUI
             get
             {
                 if (_closeConnectionCommand == null)
-                    _closeConnectionCommand = new RelayCommand(() => Client.CloseConnection());
+                    _closeConnectionCommand = new RelayCommand(() =>
+                    {
+                        _worker.CancelAsync();
+                        _worker.Dispose();
+                        Client.CloseConnection();
+                    });
 
                 return _closeConnectionCommand;
             }
@@ -175,16 +179,13 @@ namespace TrabalhoSocketsUI
             }
             else
             {
-                if (Client.SendCanMoveToRequest(selectedWrapper.Element, clickedWrapper.R, clickedWrapper.C))
+                if (Client.CanMoveTo(selectedWrapper.Element, clickedWrapper.R, clickedWrapper.C))
                 {
-                    Client.SendRequestToServerToMoveElement(selectedWrapper.Element, clickedWrapper.R, clickedWrapper.C);
-
-                    var lastMovedElement = Client.GetUpdatedGameBoard().ElementAt(clickedWrapper.R, clickedWrapper.C);
-                    Client.SendRemoveCapturedElementsAfterLastMovementRequest(lastMovedElement);
+                    Client.MoveElement(selectedWrapper.Element, clickedWrapper.R, clickedWrapper.C);
                     ReloadLoadElements();
                     UpdateGameStatusMessage();
                     UpdateListOfCapturedElements();
-                    IsMyTimeToPlay = Team == _client.GetTeamPlaying();
+                    IsMyTimeToPlay = false;
                 }
                 else
                 {
@@ -196,9 +197,11 @@ namespace TrabalhoSocketsUI
 
         private void NewGame()
         {
-            //_client.SendResetRequest();
+            var index = 0;
+            for (int i = 0; i < 9; i++)
+                for (int j = 0; j < 9; j++)
+                    Elements[index++] = new GameBoardElementWrapper(null) { C = j, R = i };
 
-            Elements.Clear();
             WhiteElementsCaptured.Clear();
             BlackElementsCaptured.Clear();
             GameEnded = false;
@@ -211,15 +214,16 @@ namespace TrabalhoSocketsUI
         {
             _worker.DoWork += (s, e) =>
             {
-                while (true)
+                while (!_worker.CancellationPending)
                 {
                     while (!IsMyTimeToPlay)
                     {
-                        if (!IsMyTimeToPlay)
+                        if (!IsMyTimeToPlay && !_worker.CancellationPending)
                             IsMyTimeToPlay = Team == _client.GetTeamPlaying();
                     }
                 }
             };
+
             _worker.RunWorkerAsync();
         }
 
@@ -241,22 +245,21 @@ namespace TrabalhoSocketsUI
 
         private void ReloadLoadElements()
         {
-            Elements.ClearOnUI();
-
             var gameBoard = Client.GetUpdatedGameBoard();
 
+            var index = 0;
+
             for (int i = 0; i < 9; i++)
-            {
                 for (int j = 0; j < 9; j++)
                 {
-                    Elements.AddOnUI(new GameBoardElementWrapper(gameBoard.Board[i, j]) { C = j, R = i });
+                    Elements[index].IsSelected = false;
+                    Elements[index++].Element = gameBoard.Board[i, j];
                 }
-            }
         }
 
         private void UpdateGameStatusMessage()
         {
-            var gameStatus = Client.SendGameStatusMessageRequest();
+            var gameStatus = Client.GetGameStatus();
 
             GameEnded = gameStatus != eGameStatus.Running;
 

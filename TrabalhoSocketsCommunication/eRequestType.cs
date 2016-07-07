@@ -11,12 +11,10 @@ namespace TrabalhoSocketsCommunication
         MoveElement,
         CanMoveElement,
         GetUpdatedGameBoard,
-        RemoveCapturedElementsAfterLastMovement,
-        GetCapturedElementsAfterLastMovement,
         GetGameStatus,
         CloseSocket,
         ResetGameBoard,
         GetTeamPlaying,
-        GiveTeam
+        PickTeam
     }
 }

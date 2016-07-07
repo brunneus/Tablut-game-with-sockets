@@ -15,7 +15,6 @@ namespace TrabalhoSocketsEngine
         }
 
         private IGameBoardElement[,] _board;
-
         public IGameBoardElement[,] Board
         {
             get
@@ -36,7 +35,7 @@ namespace TrabalhoSocketsEngine
         public void MoveFromTo(int sourceR, int sourceC, int targetR, int targetC)
         {
             var element = _board[sourceR, sourceC];
-            this.MoveTo(element, targetR, targetC);
+            MoveTo(element, targetR, targetC);
         }
 
         public void MoveTo(IGameBoardElement elementToMove, int r, int c)
@@ -48,6 +47,8 @@ namespace TrabalhoSocketsEngine
                 elementToMove.R = r;
                 _board[r, c] = elementToMove;
             }
+
+            RemoveCapturedElementsAfterLastMovement(elementToMove);
         }
 
         public bool CanMoveTo(IGameBoardElement elementToMove, int r, int c)
