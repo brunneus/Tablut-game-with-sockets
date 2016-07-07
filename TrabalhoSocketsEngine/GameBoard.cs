@@ -11,10 +11,11 @@ namespace TrabalhoSocketsEngine
     {
         public GameBoard()
         {
-            
+            _capturedElements = new List<IGameBoardElement>();
         }
 
         private IGameBoardElement[,] _board;
+
         public IGameBoardElement[,] Board
         {
             get
@@ -23,6 +24,15 @@ namespace TrabalhoSocketsEngine
             }
         }
         
+        private List<IGameBoardElement> _capturedElements;
+        public IEnumerable<IGameBoardElement> CapturedElements
+        {
+            get
+            {
+                return _capturedElements;
+            }
+        }
+
         public void MoveFromTo(int sourceR, int sourceC, int targetR, int targetC)
         {
             var element = _board[sourceR, sourceC];
@@ -134,7 +144,10 @@ namespace TrabalhoSocketsEngine
 
         public void RemoveCapturedElementsAfterLastMovement(IGameBoardElement lastMovedElement)
         {
-            this.RemoveRangeOfElements(this.GetElementsToBeCapturedAfterLastMovement(lastMovedElement));
+            var elementsCaptured = GetElementsToBeCapturedAfterLastMovement(lastMovedElement);
+            _capturedElements.AddRange(elementsCaptured);
+
+            RemoveRangeOfElements(elementsCaptured);
         }
 
         public eGameStatus GetGameStatus()

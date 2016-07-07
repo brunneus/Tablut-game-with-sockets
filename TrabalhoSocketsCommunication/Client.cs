@@ -40,7 +40,7 @@ namespace TrabalhoSocketsCommunication
 
             return SendRequestToServer<eTeam>(request);
         }
-        
+
         public eTeam GetTeamPlaying()
         {
             var request = new Request()
@@ -77,22 +77,24 @@ namespace TrabalhoSocketsCommunication
 
         private void SendRequestToServer(Request request)
         {
-            var stream = _client.GetStream();
-            var writter = new BinaryWriter(stream);
+            var reader = new BinaryReader(_client.GetStream());
+            var buffer = new byte[_client.ReceiveBufferSize];
+            var writter = new BinaryWriter(_client.GetStream());
 
             writter.Write(SerializationHelper.ObjectToByteArray(request));
+            reader.Read(buffer, 0, _client.ReceiveBufferSize);
         }
 
         private T SendRequestToServer<T>(Request request)
         {
-            SendRequestToServer(request);
-
-            var stream = _client.GetStream();
-            var reader = new BinaryReader(stream);
+            var reader = new BinaryReader(_client.GetStream());
             var buffer = new byte[_client.ReceiveBufferSize];
+            var writter = new BinaryWriter(_client.GetStream());
+
+            writter.Write(SerializationHelper.ObjectToByteArray(request));
             reader.Read(buffer, 0, _client.ReceiveBufferSize);
 
-            return SerializationHelper.ByteArrayToObject<T>(buffer);
+            return (T)SerializationHelper.ByteArrayToObject<Request>(buffer).ReplyServerValue;
         }
 
         public eGameStatus SendGameStatusMessageRequest()

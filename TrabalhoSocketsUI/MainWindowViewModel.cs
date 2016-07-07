@@ -13,36 +13,25 @@ namespace TrabalhoSocketsUI
     public class MainWindowViewModel : INotifyPropertyChanged
     {
         private eTeam _team;
-        private BackgroundWorker _worker = new BackgroundWorker();
+        BackgroundWorker _worker = new BackgroundWorker();
 
         public MainWindowViewModel()
         {
             //Server.Instance.Intialize();
-            
+
             _client = new Client();
             _client.InitializeConnection();
-
-            Team = _client.GiveTeam();
-            IsMyTimeToPlay = Team == _client.GetTeamPlaying();
 
             Elements = new ObservableCollection<GameBoardElementWrapper>();
             WhiteElementsCaptured = new ObservableCollection<GameBoardElementWrapper>();
             BlackElementsCaptured = new ObservableCollection<GameBoardElementWrapper>();
 
-            _worker = new BackgroundWorker();
-            //_worker.DoWork += _worker_DoWork;
-            //_worker.RunWorkerAsync();
+            Team = _client.GiveTeam();
+            IsMyTimeToPlay = Team == _client.GetTeamPlaying();
 
             NewGame();
-        }
 
-        private void _worker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            while (true)
-            {
-                IsMyTimeToPlay = Team == _client.GetTeamPlaying();
-                ReloadLoadElements();
-            }
+            WaitOtherPlayerPlays();
         }
 
         public ObservableCollection<GameBoardElementWrapper> Elements { get; set; }
@@ -60,7 +49,7 @@ namespace TrabalhoSocketsUI
                 return _selectElementToMoveCommand;
             }
         }
-        
+
         private RelayCommand _newGameCommand;
         public RelayCommand NewGameCommand
         {
@@ -109,7 +98,6 @@ namespace TrabalhoSocketsUI
             {
                 return _gameEnded;
             }
-
             set
             {
                 _gameEnded = value;
@@ -127,6 +115,14 @@ namespace TrabalhoSocketsUI
             set
             {
                 _isMyTimeToPlay = value;
+
+                if (value)
+                {
+                    ReloadLoadElements();
+                    UpdateGameStatusMessage();
+                    UpdateListOfCapturedElements();
+                }
+
                 PropertyChanged(this, new PropertyChangedEventArgs(nameof(IsMyTimeToPlay)));
             }
         }
@@ -184,11 +180,11 @@ namespace TrabalhoSocketsUI
                     Client.SendRequestToServerToMoveElement(selectedWrapper.Element, clickedWrapper.R, clickedWrapper.C);
 
                     var lastMovedElement = Client.GetUpdatedGameBoard().ElementAt(clickedWrapper.R, clickedWrapper.C);
-                    UpdateListOfCapturedElements(lastMovedElement);
                     Client.SendRemoveCapturedElementsAfterLastMovementRequest(lastMovedElement);
-
                     ReloadLoadElements();
                     UpdateGameStatusMessage();
+                    UpdateListOfCapturedElements();
+                    IsMyTimeToPlay = Team == _client.GetTeamPlaying();
                 }
                 else
                 {
@@ -213,35 +209,39 @@ namespace TrabalhoSocketsUI
 
         private void WaitOtherPlayerPlays()
         {
-            var updatedGameBoard = _client.GetUpdatedGameBoard();
-            IsMyTimeToPlay = Team == _client.GetTeamPlaying();
+            _worker.DoWork += (s, e) =>
+            {
+                while (true)
+                {
+                    while (!IsMyTimeToPlay)
+                    {
+                        if (!IsMyTimeToPlay)
+                            IsMyTimeToPlay = Team == _client.GetTeamPlaying();
+                    }
+                }
+            };
+            _worker.RunWorkerAsync();
         }
 
-        private void UpdateListOfCapturedElements(IGameBoardElement lastMovedElement)
+        private void UpdateListOfCapturedElements()
         {
-            if (lastMovedElement == null)
-                return;
+            var elementsCaptured = Client.GetUpdatedGameBoard().CapturedElements;
 
-            var blackTeamElementsCount = this.Elements.Where(e => e.Element != null && e.Element.Team == eTeam.Black);
-            var whiteTeamElementsCount = this.Elements.Where(e => e.Element != null && e.Element.Team == eTeam.White);
-
-            var elementsCaptured = Client.SendGetCapturedElementsAfterLastMovementRequest(lastMovedElement);
-            var team = lastMovedElement.Team == eTeam.Black ? eTeam.White : eTeam.Black;
+            BlackElementsCaptured.ClearOnUI();
+            WhiteElementsCaptured.ClearOnUI();
 
             foreach (var element in elementsCaptured)
             {
-                var wrapper = this.Elements.First(e => e.R == element.R && e.C == element.C);
-
-                if (team == eTeam.Black)
-                    this.BlackElementsCaptured.Add(wrapper);
+                if (element.Team == eTeam.Black)
+                    BlackElementsCaptured.AddOnUI(new GameBoardElementWrapper(element));
                 else
-                    this.WhiteElementsCaptured.Add(wrapper);
+                    WhiteElementsCaptured.AddOnUI(new GameBoardElementWrapper(element));
             }
         }
 
         private void ReloadLoadElements()
         {
-            Elements.Clear();
+            Elements.ClearOnUI();
 
             var gameBoard = Client.GetUpdatedGameBoard();
 
@@ -262,19 +262,19 @@ namespace TrabalhoSocketsUI
 
             if (gameStatus == eGameStatus.BlackTeamWithoutValidMovements)
             {
-                this.GameStatusMessage = "Time ganhador: Branco (Peças pretas não possuem movimentos válidos)!";
+                GameStatusMessage = "Time ganhador: Branco (Peças pretas não possuem movimentos válidos)!";
             }
             else if (gameStatus == eGameStatus.WhiteTeamWithoutValidMovements)
             {
-                this.GameStatusMessage = "Time ganhador: Preto (Peças brancas não possuem movimentos válidos)!";
+                GameStatusMessage = "Time ganhador: Preto (Peças brancas não possuem movimentos válidos)!";
             }
             else if (gameStatus == eGameStatus.KingSorroundByMercenaries)
             {
-                this.GameStatusMessage = "Time ganhador: Preto (Rei esta cercado de mercenários)!";
+                GameStatusMessage = "Time ganhador: Preto (Rei esta cercado de mercenários)!";
             }
             else if (gameStatus == eGameStatus.KingArriveAtSomeSide)
             {
-                this.GameStatusMessage = "Time ganhador: Branco (Rei chegou em um dos 4 lados)!";
+                GameStatusMessage = "Time ganhador: Branco (Rei chegou em um dos 4 lados)!";
             }
         }
     }

@@ -15,7 +15,6 @@ namespace TrabalhoSocketsCommunication
     {
         private GameBoard _gameBoard;
         private TcpListener _tcpListener;
-        private List<BinaryWriter> _connectedClientsStreamWritter = new List<BinaryWriter>();
         private eTeam _teamPlaying = eTeam.Black;
         private IEnumerable<eTeam> _availableTeams = new eTeam[] { eTeam.Black, eTeam.White };
 
@@ -38,49 +37,12 @@ namespace TrabalhoSocketsCommunication
         {
             _tcpListener = new TcpListener(new IPAddress(IPAddress.Parse("127.0.0.1").GetAddressBytes()), 1025);
             _tcpListener.Start();
-
-            //var clientSocket = _tcpListener.AcceptTcpClient();
-            //var clientSocket2 = _tcpListener.AcceptTcpClient();
-
             StartAccept();
-
-            //var streamClient1 = clientSocket.GetStream();
-            //var readerClient1 = new BinaryReader(streamClient1);
-            //var writterClient1 = new BinaryWriter(streamClient1);
-
-            //var streamClient2 = clientSocket2.GetStream();
-            //var readerClient2 = new BinaryReader(streamClient2);
-            //var writterClient2 = new BinaryWriter(streamClient2);
-
-            //Request lastRequest;
-
-            //var currentClientReader = readerClient1;
-            //var currentClientWriter = writterClient1;
-
-            //do
-            //{  
-            //    currentClientReader.Read(buffer, 0, clientSocket.ReceiveBufferSize);
-
-            //    lastRequest = SerializationHelper.ByteArrayToObject<Request>(buffer);
-            //    currentClientWriter.Write(SerializationHelper.ObjectToByteArray(HandleRequest(lastRequest)));
-
-            //    currentClientReader = currentClientReader == readerClient1 ? readerClient2 : readerClient1;
-            //    currentClientWriter = currentClientWriter == writterClient1 ? writterClient2 : writterClient1;
-
-            //    if (lastRequest.Type == eRequestType.MoveElement)
-            //    {
-            //        currentClientWriter.Write(SerializationHelper.ObjectToByteArray(_gameBoard));
-            //        _teamPlaying = _teamPlaying == eTeam.Black ? eTeam.White : eTeam.Black;
-            //    }
-
-            //} while (lastRequest.Type != eRequestType.CloseSocket);
-
-            //clientSocket.Close();
         }
 
         private void AcceptedClient(IAsyncResult ar)
         {
-            StartAccept(); //listen for new connections again
+            StartAccept();
             var client = _tcpListener.EndAcceptTcpClient(ar);
             RecieveRequests(client);
         }
@@ -106,19 +68,19 @@ namespace TrabalhoSocketsCommunication
                 readerClient.Read(buffer, 0, client.ReceiveBufferSize);
 
                 lastRequest = SerializationHelper.ByteArrayToObject<Request>(buffer);
-                writterClient.Write(SerializationHelper.ObjectToByteArray(HandleRequest(lastRequest)));
+                lastRequest.ReplyServerValue = HandleRequest(lastRequest);
+                writterClient.Write(SerializationHelper.ObjectToByteArray(lastRequest));
 
                 if (lastRequest.Type == eRequestType.MoveElement)
                 {
-                    var otherClientStreamWritter = _connectedClientsStreamWritter.First(w => w != writterClient);
-                    otherClientStreamWritter.Write(SerializationHelper.ObjectToByteArray(_gameBoard));
-
                     _teamPlaying = _teamPlaying == eTeam.Black ?
                         eTeam.White : 
                         eTeam.Black;
                 }
 
             } while (lastRequest.Type != eRequestType.CloseSocket);
+
+            client.Close();
         }
 
         private object HandleRequest(Request request)
