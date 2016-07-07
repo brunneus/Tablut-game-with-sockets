@@ -12,18 +12,37 @@ namespace TrabalhoSocketsUI
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
+        private eTeam _team;
+        private BackgroundWorker _worker = new BackgroundWorker();
+
         public MainWindowViewModel()
         {
-            Server.Instance.Intialize();
-
+            //Server.Instance.Intialize();
+            
             _client = new Client();
             _client.InitializeConnection();
+
+            Team = _client.GiveTeam();
+            IsMyTimeToPlay = Team == _client.GetTeamPlaying();
 
             Elements = new ObservableCollection<GameBoardElementWrapper>();
             WhiteElementsCaptured = new ObservableCollection<GameBoardElementWrapper>();
             BlackElementsCaptured = new ObservableCollection<GameBoardElementWrapper>();
 
+            _worker = new BackgroundWorker();
+            //_worker.DoWork += _worker_DoWork;
+            //_worker.RunWorkerAsync();
+
             NewGame();
+        }
+
+        private void _worker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            while (true)
+            {
+                IsMyTimeToPlay = Team == _client.GetTeamPlaying();
+                ReloadLoadElements();
+            }
         }
 
         public ObservableCollection<GameBoardElementWrapper> Elements { get; set; }
@@ -98,17 +117,17 @@ namespace TrabalhoSocketsUI
             }
         }
 
-        private eTeam _currentTeamPlaying = eTeam.Black;
-        public eTeam CurrentTeamPlaying
+        private bool _isMyTimeToPlay;
+        public bool IsMyTimeToPlay
         {
             get
             {
-                return _currentTeamPlaying;
+                return _isMyTimeToPlay;
             }
-            private set
+            set
             {
-                _currentTeamPlaying = value;
-                PropertyChanged(this, new PropertyChangedEventArgs("CurrentTeamPlaying"));
+                _isMyTimeToPlay = value;
+                PropertyChanged(this, new PropertyChangedEventArgs(nameof(IsMyTimeToPlay)));
             }
         }
 
@@ -125,12 +144,25 @@ namespace TrabalhoSocketsUI
                 _client = value;
             }
         }
-        
+
+        public eTeam Team
+        {
+            get
+            {
+                return _team;
+            }
+
+            set
+            {
+                _team = value;
+            }
+        }
+
         private void MoveElement(GameBoardElementWrapper clickedWrapper)
         {
             var selectedWrapper = this.Elements.FirstOrDefault(e => e.IsSelected);
 
-            if (clickedWrapper.Element != null && clickedWrapper.Element.Team != CurrentTeamPlaying)
+            if (clickedWrapper.Element != null && clickedWrapper.Element.Team != Team)
             {
                 if (selectedWrapper != null)
                     selectedWrapper.IsSelected = false;
@@ -155,8 +187,6 @@ namespace TrabalhoSocketsUI
                     UpdateListOfCapturedElements(lastMovedElement);
                     Client.SendRemoveCapturedElementsAfterLastMovementRequest(lastMovedElement);
 
-                    CurrentTeamPlaying = CurrentTeamPlaying == eTeam.Black ? eTeam.White : eTeam.Black;
-
                     ReloadLoadElements();
                     UpdateGameStatusMessage();
                 }
@@ -170,7 +200,7 @@ namespace TrabalhoSocketsUI
 
         private void NewGame()
         {
-            _client.SendResetRequest();
+            //_client.SendResetRequest();
 
             Elements.Clear();
             WhiteElementsCaptured.Clear();
@@ -179,6 +209,12 @@ namespace TrabalhoSocketsUI
             GameStatusMessage = string.Empty;
 
             ReloadLoadElements();
+        }
+
+        private void WaitOtherPlayerPlays()
+        {
+            var updatedGameBoard = _client.GetUpdatedGameBoard();
+            IsMyTimeToPlay = Team == _client.GetTeamPlaying();
         }
 
         private void UpdateListOfCapturedElements(IGameBoardElement lastMovedElement)
@@ -205,7 +241,7 @@ namespace TrabalhoSocketsUI
 
         private void ReloadLoadElements()
         {
-            this.Elements.Clear();
+            Elements.Clear();
 
             var gameBoard = Client.GetUpdatedGameBoard();
 
@@ -213,7 +249,7 @@ namespace TrabalhoSocketsUI
             {
                 for (int j = 0; j < 9; j++)
                 {
-                    Elements.Add(new GameBoardElementWrapper(gameBoard.Board[i, j]) { C = j, R = i });
+                    Elements.AddOnUI(new GameBoardElementWrapper(gameBoard.Board[i, j]) { C = j, R = i });
                 }
             }
         }

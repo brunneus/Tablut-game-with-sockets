@@ -54,7 +54,7 @@ namespace TrabalhoSocketsUI.Behaviors
             }
             else
             {
-                if (wrapper.Element == null || wrapper.Element.Team != MainWindowViewModel.CurrentTeamPlaying)
+                if (wrapper.Element == null || wrapper.Element.Team != MainWindowViewModel.Team)
                 {
                     this.AssociatedObject.Background = Brushes.Transparent;
                 }

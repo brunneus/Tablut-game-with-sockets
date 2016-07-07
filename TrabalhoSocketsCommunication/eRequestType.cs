@@ -15,6 +15,8 @@ namespace TrabalhoSocketsCommunication
         GetCapturedElementsAfterLastMovement,
         GetGameStatus,
         CloseSocket,
-        ResetGameBoard
+        ResetGameBoard,
+        GetTeamPlaying,
+        GiveTeam
     }
 }

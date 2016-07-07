@@ -31,6 +31,26 @@ namespace TrabalhoSocketsCommunication
             SendRequestToServer(request);
         }
 
+        public eTeam GiveTeam()
+        {
+            var request = new Request()
+            {
+                Type = eRequestType.GiveTeam,
+            };
+
+            return SendRequestToServer<eTeam>(request);
+        }
+        
+        public eTeam GetTeamPlaying()
+        {
+            var request = new Request()
+            {
+                Type = eRequestType.GetTeamPlaying,
+            };
+
+            return SendRequestToServer<eTeam>(request);
+        }
+
         public GameBoard GetUpdatedGameBoard()
         {
             var request = new Request()
@@ -38,9 +58,9 @@ namespace TrabalhoSocketsCommunication
                 Type = eRequestType.GetUpdatedGameBoard,
             };
 
-            var reply = SendRequestToServer(request);
+            var reply = SendRequestToServer<GameBoard>(request);
 
-            return (GameBoard)reply.ReplyServerValue;
+            return reply;
         }
 
         public IEnumerable<IGameBoardElement> SendGetCapturedElementsAfterLastMovementRequest(IGameBoardElement lastMovedElement)
@@ -51,22 +71,28 @@ namespace TrabalhoSocketsCommunication
                 ClientParameterValue = lastMovedElement
             };
 
-            var reply = SendRequestToServer(request);
-            return (IEnumerable<IGameBoardElement>)reply.ReplyServerValue;
+            var reply = SendRequestToServer<IEnumerable<IGameBoardElement>>(request);
+            return reply;
         }
 
-        private Request SendRequestToServer(Request request)
+        private void SendRequestToServer(Request request)
         {
             var stream = _client.GetStream();
-            var reader = new BinaryReader(stream);
             var writter = new BinaryWriter(stream);
 
             writter.Write(SerializationHelper.ObjectToByteArray(request));
+        }
 
+        private T SendRequestToServer<T>(Request request)
+        {
+            SendRequestToServer(request);
+
+            var stream = _client.GetStream();
+            var reader = new BinaryReader(stream);
             var buffer = new byte[_client.ReceiveBufferSize];
             reader.Read(buffer, 0, _client.ReceiveBufferSize);
 
-            return SerializationHelper.ByteArrayToObject<Request>(buffer);
+            return SerializationHelper.ByteArrayToObject<T>(buffer);
         }
 
         public eGameStatus SendGameStatusMessageRequest()
@@ -76,9 +102,7 @@ namespace TrabalhoSocketsCommunication
                 Type = eRequestType.GetGameStatus
             };
 
-            var reply = this.SendRequestToServer(request);
-
-            return (eGameStatus)Enum.Parse(typeof(eGameStatus), reply.ReplyServerValue.ToString());
+            return SendRequestToServer<eGameStatus>(request);
         }
 
         public void SendRemoveCapturedElementsAfterLastMovementRequest(IGameBoardElement lastMovedElement)
@@ -100,7 +124,7 @@ namespace TrabalhoSocketsCommunication
                 ClientParameterValue = new MoveElementTransferObject() { GameBoardElement = element, TargetR = r, TargetC = c }
             };
 
-            return (bool)SendRequestToServer(request).ReplyServerValue;
+            return SendRequestToServer<bool>(request);
         }
 
         public void SendResetRequest()

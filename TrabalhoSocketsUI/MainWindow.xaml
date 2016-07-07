@@ -86,6 +86,7 @@
                                  ItemsSource="{Binding Elements,
                                                        Mode=TwoWay}"
                                  Padding="-1"
+                                 IsEnabled="{Binding IsMyTimeToPlay}"
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                  ScrollViewer.VerticalScrollBarVisibility="Disabled">
                             <ListBox.ItemsPanel>
@@ -121,10 +122,11 @@
                                FontWeight="Bold">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
-                                <Setter Property="Text" Value="Jogador atual: Peças brancas" />
+                                <Setter Property="Text" Value="Aguarde, o outro jogador esta jogando......" />
+                                
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding CurrentTeamPlaying}" Value="Black">
-                                        <Setter Property="Text" Value="Jogador atual: Peças pretas" />
+                                    <DataTrigger Binding="{Binding IsMyTimeToPlay}" Value="True">
+                                        <Setter Property="Text" Value="É a sua vez de jogar!!!!!" />
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding GameEnded}" Value="true">
                                         <Setter Property="Visibility" Value="Collapsed" />

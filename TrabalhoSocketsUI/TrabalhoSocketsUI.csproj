@@ -58,6 +58,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Behaviors\MouseEnterGameBoardControlBehavior.cs" />
+    <Compile Include="CollectionExtension.cs" />
     <Compile Include="Converters\CurrentTeamPlayToBoolConverter.cs" />
     <Compile Include="Converters\NegateConverter.cs" />
     <Compile Include="GameBoardElementControl.cs" />
